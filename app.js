@@ -39,6 +39,14 @@ function money(x) {
   const usd = ccy === "usd" && state.fx;
   return s(x * (usd ? state.fx : 1)) + (usd ? " $" : " \u20AC");
 }
+function costUnit(x) {
+  if (x === null || x === undefined || !isFinite(x)) return "n/a";
+  const usd = ccy === "usd" && state.fx;
+  const v = x * (usd ? state.fx : 1);
+  const st = (Math.abs(v) < 0.01 ? NF(0, 8) : NF(0, 4)).format(v);
+  const t = st.indexOf(".") >= 0 ? st.replace(/\.?0+$/, "") : st;
+  return (t || "0") + (usd ? " $" : " \u20AC");
+}
 const CCY_SYM = () => (ccy === "usd" && state.fx ? "$" : "\u20AC");
 
 /* ---------- data ---------- */
@@ -245,7 +253,7 @@ function renderTables(rows, t) {
     const pc = priceFor(x.asset, ccy);
     return [
       x.asset,
-      money(x.quantity ? x.cost_basis / x.quantity : 0),
+      costUnit(x.quantity ? x.cost_basis / x.quantity : 0),
       (pc === null ? "n/a" : pfmt(pc) + " " + CCY_SYM()),
     ];
   }), null);
