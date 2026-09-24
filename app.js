@@ -112,10 +112,23 @@ function renderSummary(t) {
   g.appendChild(stat("Gifted & staked value", money(zc)));
   g.appendChild(stat("Realized P/L", money(meta.total_realized), meta.total_realized >= 0 ? "pos" : "neg"));
   if (meta.realized_by_year && typeof meta.realized_by_year === "object") {
-    for (const k of Object.keys(meta.realized_by_year).sort()) {
-      const v = meta.realized_by_year[k];
-      if (typeof v !== "number" || Math.abs(v) < 0.005) continue;
-      g.appendChild(stat("Tax " + k, money(v), v >= 0 ? "pos" : "neg", "", "small"));
+    const ys = Object.keys(meta.realized_by_year).sort()
+      .filter((k) => { const v = meta.realized_by_year[k]; return typeof v === "number" && Math.abs(v) >= 0.005; });
+    if (ys.length) {
+      const panel = el("div", "stat tax-years");
+      panel.appendChild(el("span", "k", "Realized P/L by tax year"));
+      const rows = el("div", "ty-rows");
+      for (const k of ys) {
+        const v = meta.realized_by_year[k];
+        const row = el("div", "ty-row");
+        row.appendChild(el("span", "ty-y", k));
+        row.appendChild(el("span", "ty-v " + (v >= 0 ? "pos" : "neg"), (v >= 0 ? "+" : "") + money(v)));
+        rows.appendChild(row);
+      }
+      panel.appendChild(rows);
+      panel.appendChild(el("div", "ty-foot",
+        "Realized gains/losses from trades closed in each tax year - positive is profit, negative is loss. This is not the tax owed, and years without realized trades are omitted."));
+      g.appendChild(panel);
     }
   }
   g.appendChild(stat("Net deposited", money(meta.net_deposited)));
