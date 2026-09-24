@@ -80,17 +80,17 @@ function renderSummary(t) {
   const r3 = t.c ? (t.u3 / t.c) * 100 : null;
   const r1 = t.c ? (t.u1 / t.c) * 100 : null;
   const zc = t.v1 !== null ? t.v1 - t.v3 : null;
-  g.appendChild(stat("Option 3 value", s(t.v3), r3 !== null && r3 >= 0 ? "pos" : (r3 !== null ? "neg" : "")));
-  g.appendChild(stat("Option 3 return", rfmt(r3), r3 !== null && r3 >= 0 ? "pos" : (r3 !== null ? "neg" : "")));
-  g.appendChild(stat("Option 1 value", s(t.v1)));
-  g.appendChild(stat("Option 1 return", rfmt(r1), r1 !== null && r1 >= 0 ? "pos" : (r1 !== null ? "neg" : "")));
+  g.appendChild(stat("Portfolio value", s(t.v1)));
+  g.appendChild(stat("Portfolio return", rfmt(r1), r1 !== null && r1 >= 0 ? "pos" : (r1 !== null ? "neg" : "")));
+  g.appendChild(stat("Invested value", s(t.v3)));
+  g.appendChild(stat("Invested return", rfmt(r3), r3 !== null && r3 >= 0 ? "pos" : (r3 !== null ? "neg" : "")));
   g.appendChild(stat("Shared cost basis", s(t.c)));
-  g.appendChild(stat("Zero-cost holdings", s(zc)));
+  g.appendChild(stat("Gifted & staked value", s(zc)));
   g.appendChild(stat("Realized P/L", s(meta.total_realized), meta.total_realized >= 0 ? "pos" : "neg"));
-  g.appendChild(stat("EUR net deposited", s(meta.net_deposited)));
-  g.appendChild(stat("EUR deposited", s(meta.total_deposited), "small"));
-  g.appendChild(stat("EUR withdrawn", s(meta.total_withdrawn), "small"));
-  g.appendChild(stat("EUR remaining", s(meta.eur_remaining), "small"));
+  g.appendChild(stat("Net deposited", s(meta.net_deposited)));
+  g.appendChild(stat("Deposited", s(meta.total_deposited), "small"));
+  g.appendChild(stat("Withdrawn", s(meta.total_withdrawn), "small"));
+  g.appendChild(stat("EUR on hand", s(meta.eur_remaining), "small"));
   g.appendChild(stat("Generated", (state.data.generated_at || "").replace(" ", " "), "small"));
 }
 
