@@ -26,6 +26,10 @@
       <button id="tabCards" class="seg-btn active" role="tab" aria-selected="true">Cards</button>
       <button id="tabTerminal" class="seg-btn" role="tab" aria-selected="false">Terminal</button>
     </div>
+    <div class="seg" role="group" aria-label="Display currency">
+      <button id="ccyEUR" class="seg-btn active" type="button">EUR</button>
+      <button id="ccyUSD" class="seg-btn" type="button">USD</button>
+    </div>
     <button id="btnRefresh" class="btn" type="button">Refresh prices</button>
     <button id="btnImport" class="btn" type="button">Import report</button>
     <input id="fileImport" type="file" accept=".json,application/json" hidden>
@@ -51,13 +55,19 @@
 
     <div id="warnBox" class="warn" hidden></div>
 
+    <div id="chartCard" hidden>
+      <div class="chart-head"><span class="k">Portfolio value &middot; last 365 days</span><span id="chartEst" class="chart-est"></span></div>
+      <svg id="chart" viewBox="0 0 600 150" preserveAspectRatio="none" aria-label="Portfolio value over the last 365 days"></svg>
+      <div id="chartMeta" class="chart-meta"></div>
+    </div>
+
     <h2 class="sec">Invested <small>only units you bought; excludes gifts &amp; staking rewards</small></h2>
     <div class="table-wrap"><table id="tbl3"></table></div>
 
     <h2 class="sec">Full portfolio <small>all holdings, incl. gifts &amp; staking rewards</small></h2>
     <div class="table-wrap"><table id="tbl1"></table></div>
 
-    <h2 class="sec">Cost vs live price <small>per unit, in EUR</small></h2>
+    <h2 class="sec">Cost vs live price <small id="ccyLabel">per unit, in EUR</small></h2>
     <div class="table-wrap"><table id="tblRef"></table></div>
   </section>
 
