@@ -58,7 +58,11 @@
     <div id="chartCard" hidden>
       <div class="chart-head"><span class="k">Portfolio value &middot; last 365 days</span><span id="chartEst" class="chart-est"></span></div>
       <svg id="chart" viewBox="0 0 600 150" preserveAspectRatio="none" aria-label="Portfolio value over the last 365 days"></svg>
-      <div id="chartMeta" class="chart-meta"></div>
+      <div id="chartLegend" class="chart-legend">
+        <span class="lg-item"><span class="lg-line lg-value"></span>Value</span>
+        <span class="lg-item" id="lgCost"><span class="lg-line lg-cost"></span>Cost</span>
+      </div>
+      <div id="chartStats" class="chart-stats"></div>
     </div>
 
     <h2 class="sec">Invested <small>only units you bought; excludes gifts &amp; staking rewards</small></h2>

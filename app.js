@@ -166,14 +166,21 @@ function renderChart() {
   const y = (v) => H - P - ((v - lo) / span) * (H - 2 * P);
   const path = (arr) => arr.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join("");
   const line = `<path d="${path(vals)}" fill="none" stroke="var(--accent)" stroke-width="1.5"/>`;
-  let costPath = "";
+  let costPath = "", hasCost = false;
   if (Array.isArray(h.cost) && h.cost.length === vals.length) {
+    hasCost = true;
     costPath = `<path d="${path(h.cost)}" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3"/>`;
   }
   svg.innerHTML = `<rect width="${W}" height="${H}" fill="var(--panel)"/>` + costPath + line;
+  $("lgCost").hidden = !hasCost;
   const last = h.dates[h.dates.length - 1];
-  $("chartMeta").textContent = "start " + money(vals[0]) + "   now " + money(vals[vals.length - 1]) +
-    "   high " + money(hi) + "   low " + money(lo) + "   " + last;
+  const tile = (lab, v, extra) =>
+    `<span class="cs"><span class="cs-lab">${lab}</span><span class="cs-val">${money(v)}</span>${extra ? `<span class="cs-sub">${extra}</span>` : ""}</span>`;
+  $("chartStats").innerHTML =
+    tile("Start", vals[0]) +
+    tile("Now", vals[vals.length - 1], last) +
+    tile("High", hi) +
+    tile("Low", lo);
   $("chartEst").textContent = "estimate: ledger replay + residual, " + CCY_SYM() + " historical cost";
 }
 
