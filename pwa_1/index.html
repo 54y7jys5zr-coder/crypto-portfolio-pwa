@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Portfolio">
+<meta name="theme-color" content="#0d1117">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Crypto Portfolio</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>CRYPTO PORTFOLIO REPORT</h1>
+  <div class="meta-line">
+    <span id="dataSource">-</span>
+    <span class="dot">·</span>
+    <span id="priceState">-</span>
+  </div>
+  <div class="controls">
+    <div class="seg" role="tablist" aria-label="View mode">
+      <button id="tabCards" class="seg-btn active" role="tab" aria-selected="true">Cards</button>
+      <button id="tabTerminal" class="seg-btn" role="tab" aria-selected="false">Terminal</button>
+    </div>
+    <div class="seg" role="group" aria-label="Display currency">
+      <button id="ccyEUR" class="seg-btn active" type="button">EUR</button>
+      <button id="ccyUSD" class="seg-btn" type="button">USD</button>
+    </div>
+    <button id="btnRefresh" class="btn" type="button">Refresh prices</button>
+    <button id="btnImport" class="btn" type="button">Import report</button>
+    <input id="fileImport" type="file" accept=".json,application/json" hidden>
+  </div>
+</header>
+
+<main>
+  <section id="viewEmpty" hidden>
+    <div class="empty-card">
+      <h2>No report on this device yet</h2>
+      <ol>
+        <li>On your Mac, open <strong>Portfolio.app</strong> and choose <strong>5) Build/update the phone web app</strong>.</li>
+        <li>Send <strong>report.json</strong> to this iPhone (AirDrop, iCloud Drive, Files, message, ...).</li>
+        <li>Tap <strong>Import report</strong> and pick report.json from Files.</li>
+      </ol>
+      <p class="hint">Your data stays on this device. Only prices are fetched live from CoinGecko.</p>
+    </div>
+  </section>
+
+  <section id="viewCards" hidden>
+    <div id="summary" class="grid"></div>
+    <p class="hint">Portfolio = everything you hold &middot; Invested = only units you bought (gifts &amp; staking excluded)</p>
+
+    <div id="warnBox" class="warn" hidden></div>
+
+    <div id="chartCard" hidden>
+      <div class="chart-head"><span class="k">Portfolio value &middot; last 365 days</span><span id="chartEst" class="chart-est"></span></div>
+      <svg id="chart" viewBox="0 0 600 150" preserveAspectRatio="none" aria-label="Portfolio value over the last 365 days"></svg>
+      <div id="chartLegend" class="chart-legend">
+        <span class="lg-item"><span class="lg-line lg-value"></span>Value</span>
+        <span class="lg-item" id="lgCost"><span class="lg-line lg-cost"></span>Cost</span>
+      </div>
+      <div id="chartStats" class="chart-stats"></div>
+    </div>
+
+    <h2 class="sec">Invested <small>only units you bought; excludes gifts &amp; staking rewards</small></h2>
+    <div class="table-wrap"><table id="tbl3"></table></div>
+
+    <h2 class="sec">Full portfolio <small>all holdings, incl. gifts &amp; staking rewards</small></h2>
+    <div class="table-wrap"><table id="tbl1"></table></div>
+
+    <h2 class="sec">Cost vs live price <small id="ccyLabel">per unit, in EUR</small></h2>
+    <div class="table-wrap"><table id="tblRef"></table></div>
+  </section>
+
+  <section id="viewTerminal" hidden>
+    <pre id="termText"></pre>
+  </section>
+</main>
+
+<footer>Analysis/accounting tool - not tax or investment advice. Prices are a live snapshot and change continuously.</footer>
+<script src="app.js"></script>
+</body>
+</html>

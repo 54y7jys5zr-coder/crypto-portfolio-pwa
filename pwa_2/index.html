@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.coingecko.com https://api.frankfurter.dev; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#6366F1"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Portfolio"/>
+<link rel="apple-touch-icon" href="icons/icon-180.png"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<title>Crypto Portfolio</title>
+<link rel="stylesheet" href="styles.css"/>
+<script src="chart.umd.min.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="dot"></span>
+    <h1>Portfolio</h1>
+  </div>
+  <div class="top-actions">
+    <div class="ccy-toggle" id="ccyToggle" role="group" aria-label="Currency">
+      <button data-ccy="EUR" class="active">€ EUR</button>
+      <button data-ccy="PLN">zł PLN</button>
+    </div>
+    <button id="refreshBtn" class="icon-btn" title="Refresh now" aria-label="Refresh now">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M20 11a8 8 0 1 0-.9 3.7"/><path d="M20 4.5V11h-6.5z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="status-strip">
+  <span id="lastUpdated">—</span>
+  <span id="autoState" class="auto-on">auto 15s</span>
+</div>
+
+<main id="app">
+  <div id="ptr" class="ptr" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M20 11a8 8 0 1 0-.9 3.7"/><path d="M20 4.5V11h-6.5z"/></svg>
+  </div>
+
+  <div id="onboard" class="onboard" role="dialog" aria-label="Welcome">
+    <button id="obClose" class="ob-x" aria-label="Dismiss">✕</button>
+    <strong>Welcome 👋</strong>
+    <p>Tap any asset for details. Two views: <b>All Holdings</b> (everything you own) and
+    <b>Invested Only</b> (just the coins you paid for). Import fresh CSVs anytime in <b>Settings</b>.</p>
+    <button id="obGo" class="ob-go">Got it</button>
+  </div>
+  <!-- SUMMARY / OVERVIEW VIEW -->
+  <section id="view-summary" class="view active">
+    <div class="hero">
+      <div class="hero-label">Portfolio value · <span class="hero-view-name-2">All Holdings</span></div>
+      <div class="hero-value" id="sumHeroValue">—</div>
+      <div class="hero-sub">
+        <span id="sumHeroPL" class="pl">—</span>
+        <span class="muted">vs paid <span id="sumHeroCost">—</span></span>
+      </div>
+      <div class="hero-lifetime" id="heroLifetime"></div>
+      <div class="view-switch" id="viewSwitch2" role="group" aria-label="Valuation view">
+        <button data-view="1" class="active">All Holdings</button>
+        <button data-view="3">Invested Only</button>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="sumStats"></div>
+
+    <div class="sum-section">
+      <div class="sum-h">Top performers</div>
+      <div class="mini-cards" id="sumWinners"></div>
+    </div>
+    <div class="sum-section">
+      <div class="sum-h">Biggest laggards</div>
+      <div class="mini-cards" id="sumLosers"></div>
+    </div>
+    <div class="sum-section">
+      <div class="sum-h">Allocation</div>
+      <div class="alloc-donut"><canvas id="allocChart"></canvas></div>
+      <div id="allocLegend" class="alloc-legend"></div>
+    </div>
+  </section>
+
+  <!-- CARDS VIEW -->
+  <section id="view-cards" class="view">
+    <div class="hero">
+      <div class="hero-label">Total value · <span class="hero-view-name">All Holdings</span></div>
+      <div class="hero-value" id="heroValue">—</div>
+      <div class="hero-sub">
+        <span id="heroPL" class="pl">—</span>
+        <span class="muted">vs cost <span id="heroCost">—</span></span>
+      </div>
+      <div class="view-switch" id="viewSwitch" role="group" aria-label="Valuation view">
+        <button data-view="1" class="active">All Holdings</button>
+        <button data-view="3">Invested Only</button>
+      </div>
+      <div class="view-note" id="viewNote">Everything you hold, including gifts &amp; staking rewards.</div>
+    </div>
+    <div class="controls">
+      <input type="search" id="cardSearch" class="search" placeholder="Search asset…" aria-label="Search asset"/>
+      <div class="sort-select">
+        <select id="cardSort" aria-label="Sort cards">
+          <option value="value">Sort: Value</option>
+          <option value="unreal">Sort: Profit/Loss</option>
+          <option value="ret">Sort: Return %</option>
+          <option value="asset">Sort: Name</option>
+        </select>
+      </div>
+      <button id="densityBtn" class="icon-btn" title="Toggle density" aria-label="Toggle density">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v2H4zM4 11h16v2H4zM4 17h16v2H4z"/></svg>
+      </button>
+    </div>
+    <div id="cards" class="cards"></div>
+  </section>
+
+  <!-- TABLES VIEW -->
+  <section id="view-tables" class="view">
+    <div class="table-tabs" id="tableTabs">
+      <button data-t="1" class="active">All Holdings</button>
+      <button data-t="3">Invested Only</button>
+    </div>
+    <div class="controls">
+      <input type="search" id="tableSearch" class="search" placeholder="Search asset…" aria-label="Search asset"/>
+      <button id="exportCsvBtn" class="chip-btn" title="Export CSV">⤓ CSV</button>
+      <button id="shareBtn" class="chip-btn" title="Share snapshot">↗ Share</button>
+    </div>
+    <div class="table-scroll" id="tableScroll"><div class="table-wrap"><table id="mainTable"><thead></thead><tbody></tbody></table></div></div>
+    <div class="scroll-hint">← swipe table sideways for more columns →</div>
+    <div class="summary" id="summary"></div>
+  </section>
+
+  <!-- CHART VIEW -->
+  <section id="view-chart" class="view">
+    <div class="chart-head">
+      <div>
+        <div class="hero-label">Value over 365 days <span class="muted">(approx.)</span></div>
+        <div class="chart-legend">
+          <span><i class="sw val"></i>Value</span>
+          <span><i class="sw cost"></i>Cost basis</span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="valueChart"></canvas></div>
+    <div id="chartStats" class="chart-stats"></div>
+    <p class="fine muted">Approximation: current holdings valued at historical daily prices. Not point-in-time holdings.</p>
+  </section>
+
+  <!-- SETTINGS VIEW -->
+  <section id="view-settings" class="view">
+    <h2>Data</h2>
+    <p class="muted small">Using <strong id="dataSource">bundled snapshot</strong>. Import fresh CSV exports (Balances / Ledger / Trades) to recompute — everything runs on your device.</p>
+    <div class="import-grid">
+      <label class="file-drop">Balances CSV<input type="file" id="fileBal" accept=".csv"/><span id="nameBal">none</span></label>
+      <label class="file-drop">Ledger CSV<input type="file" id="fileLed" accept=".csv"/><span id="nameLed">none</span></label>
+      <label class="file-drop">Trades CSV<input type="file" id="fileTrd" accept=".csv"/><span id="nameTrd">none</span></label>
+    </div>
+    <button id="recomputeBtn" class="primary-btn" disabled>Recompute from CSV</button>
+    <button id="resetBtn" class="ghost-btn">Reset to bundled snapshot</button>
+    <div id="importMsg" class="msg"></div>
+
+    <h2>Text size</h2>
+    <p class="muted small">Scales the whole app. Also respects your browser/iOS text-size setting.</p>
+    <div class="textsize-toggle" id="textSize" role="group" aria-label="Text size">
+      <button data-scale="0.9">A</button>
+      <button data-scale="1" class="active">A</button>
+      <button data-scale="1.15">A</button>
+      <button data-scale="1.3">A</button>
+    </div>
+
+    <h2>Auto-refresh</h2>
+    <label class="switch-row"><span>Auto-refresh prices (15s)</span>
+      <input type="checkbox" id="autoToggle" checked/></label>
+
+    <h2>About</h2>
+    <p class="muted small">Strict-FIFO cost basis (EUR). <strong>All Holdings</strong> = everything you own, incl. gifts &amp; staking rewards (free coins). <strong>Invested Only</strong> = just the coins you paid for. Prices: CoinGecko (live); FX: live EUR/PLN. Analysis tool — not tax or investment advice.</p>
+    <p class="muted small" id="reconMsg"></p>
+  </section>
+</main>
+
+<nav class="bottom-nav" id="nav">
+  <button data-nav="summary" class="active" aria-label="Summary">
+    <svg class="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg>
+    <span>Summary</span></button>
+  <button data-nav="cards" aria-label="Cards">
+    <svg class="ni" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></svg>
+    <span>Cards</span></button>
+  <button data-nav="tables" aria-label="Tables">
+    <svg class="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4zM4 10.5h16v3H4zM4 16h16v3H4z"/></svg>
+    <span>Tables</span></button>
+  <button data-nav="chart" aria-label="Chart">
+    <svg class="ni" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 15l4-4 3 3 5-6"/><path d="M3 20h18v1.6H3z"/></svg>
+    <span>Chart</span></button>
+  <button data-nav="settings" aria-label="Settings">
+    <svg class="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5Zm8.4 3.5c0-.5 0-1-.1-1.5l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2.6-1.5L14.9 2h-4l-.4 2.5A7 7 0 0 0 7.9 6l-2.4-1-2 3.4 2 1.6c-.1.5-.1 1-.1 1.5s0 1 .1 1.5l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7 7 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.6c.1-.5.1-1 .1-1.5Z"/></svg>
+    <span>Settings</span></button>
+</nav>
+
+<div id="detailBackdrop" class="sheet-backdrop"></div>
+<aside id="detailSheet" class="sheet" role="dialog" aria-label="Asset detail">
+  <div class="sheet-grip"></div>
+  <div class="sheet-head">
+    <h3 id="detailTitle">—</h3>
+    <button id="detailClose" class="icon-btn" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div id="detailBody" class="sheet-body"></div>
+</aside>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
